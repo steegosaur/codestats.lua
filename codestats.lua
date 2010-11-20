@@ -65,7 +65,7 @@ langs = {
     {
         name    = "lolcode",
         ending  = "lol",
-        comment = "BTW",
+        comment = "^%s-BTW",
         longOpen= "OBTW",
         longEnd = "TLDR"
     },
