@@ -17,7 +17,8 @@ looking at its extension. If it does not understand the extension, you may run
 it with a language flag to force the use of this language:
     ./codestats.lua --language file.ext
 Note that using the wrong language option may result in undesirable results. 
-Use at own risk.
+Use at own risk. For a list of the currently enabled languages, use
+    ./codestats.lua --help
 
 Depending on the language of the file analyzed, the output may present various 
 information. The currently implemented information includes:
