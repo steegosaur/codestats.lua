@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
--- langs.lua 0.0.1 - language config file for codestats.lua-newconfig
+-- langs.lua - language config file for codestats.lua
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
 langs = {
