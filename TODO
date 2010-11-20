@@ -3,9 +3,7 @@ Todo list for codestats.lua
 2010-11-20
     Add extraction of information (licence, etc) from file
     Clean up code
-    Fork the language information into separate file?
     Add support for more languages
         Python didn't want to work, try again
         Ruby
-        Perl
         C# ?
