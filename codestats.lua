@@ -9,9 +9,10 @@ function err(m, f)
     print("error: " .. m .. f)
     os.exit(1)
 end
-if not require(langs.file) then
-    err("could not load language list")
+if not io.open(langs.file .. ".lua", "r") then
+    err("unable to open config file ", langs.file)
 end
+require(langs.file)
 for i = 1, #langs do
     if not langs.list then
         langs.list = langs[i].name
@@ -19,7 +20,8 @@ for i = 1, #langs do
         langs.list = langs.list .. " " .. langs[i].name
     end
 end
-io.input(arg[0]) -- read version and usage
+-- Read version and usage from self - make pattern-matching instead of hard-coded pos?
+io.input(arg[0])
 for i = 1, 2 do
      name = io.read()
 end
