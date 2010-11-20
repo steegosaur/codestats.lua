@@ -81,7 +81,10 @@ function round(n)
     n = string.format("%.1f", n)
     return n
 end
-function getSize()
+function getSize(f)
+    if not ( type(f) == "userdata" ) then
+        err("could not read file handle in function getSize()")
+    end
     local l = f:seek("end")
     if ( l >= 1048576 ) then
         l = l / 1048576
@@ -161,7 +164,7 @@ stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)
 stats.xperc = round(( stats.xcount * 100 ) / stats.tcount)
 stats.lperc = round(100 - ( stats.cperc + stats.eperc ))
 stats.tperc = round(stats.lperc + stats.eperc + stats.cperc + stats.xperc)
-stats.size  = getSize()
+stats.size  = getSize(f)
 stats.print()
 -- }}}
 -- EOF
