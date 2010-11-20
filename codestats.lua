@@ -141,18 +141,18 @@ for line in f:lines() do
         if string.match(line, langs[lnum].longEnd) then
             longComment = false
         end
-    elseif langs[lnum].header and ( stats.lcount == 0 ) and string.match(line, langs[lnum].header) then
+    elseif langs[lnum].header   and ( stats.lcount == 0 ) and string.match(line, langs[lnum].header) then
         stats.header = "yes"
     elseif langs[lnum].longOpen and string.match(line, langs[lnum].longOpen) and string.match(line, langs[lnum].longEnd) then
         stats.ccount = stats.ccount + 1
     elseif langs[lnum].longOpen and string.match(line, langs[lnum].longOpen) then
         longComment = true
         stats.ccount = stats.ccount + 1
-    elseif langs[lnum].xomment and string.match(line, langs[lnum].xomment) then
+    elseif langs[lnum].xomment  and string.match(line, langs[lnum].xomment) then
         stats.xcount = stats.xcount + 1
-    elseif string.match(line, langs[lnum].comment) then
+    elseif langs[lnum].comment  and string.match(line, langs[lnum].comment) then
         stats.ccount = stats.ccount + 1
-    elseif not string.match(line, "%S") then
+    elseif string.match(line, "^%s-$") then
         stats.ecount = stats.ecount + 1
     else
         stats.lcount = stats.lcount + 1
@@ -162,7 +162,7 @@ stats.tcount = stats.ccount + stats.lcount + stats.ecount
 stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)
 stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)
 stats.xperc = round(( stats.xcount * 100 ) / stats.tcount)
-stats.lperc = round(100 - ( stats.cperc + stats.eperc ))
+stats.lperc = round(100 - ( stats.cperc + stats.eperc + stats.xperc))
 stats.tperc = round(stats.lperc + stats.eperc + stats.cperc + stats.xperc)
 stats.size  = getSize(f)
 stats.print()
