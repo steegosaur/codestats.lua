@@ -2,13 +2,6 @@
 -- codestats.lua 1.1.4 - analyze source code
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
---[[
-    TODO:
-        INFO FETCHING (LICENCE, ETC)
-        CLEAN UP THIS MESS OF A FILE
-            MAKE LEGIBLE
-            FIX SOME MORE CODE
---]]
 -- {{{ Init
 langs = {
     {
