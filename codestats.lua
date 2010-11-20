@@ -39,6 +39,12 @@ langs = {
         comment = "^%s-'"
     },
     {
+        name    = "perl",
+        ending  = "pl",
+        comment = "^%s-#",
+        header  = "^#%!/[%w%s/_%.]+perl.*"
+    },
+    {
         name    = "php",
         ending  = "php",
         comment = "%/%/",
