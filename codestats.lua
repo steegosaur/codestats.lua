@@ -1,10 +1,17 @@
 #!/usr/bin/env lua
--- codestats.lua 1.1.4 - analyze source code
+-- codestats.lua 1.2.1 - analyze source code
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
 -- {{{ Init
 langs = { file = "langs" }
-require(langs.file)
+function err(m, f)
+    if not f then f = "" end
+    print("error: " .. m .. f)
+    os.exit(1)
+end
+if not require(langs.file) then
+    err("could not load language list")
+end
 for i = 1, #langs do
     if not langs.list then
         langs.list = langs[i].name
@@ -21,13 +28,13 @@ name = string.gsub(name, "^%-%-%s+", "")
 msg = {
     noarg = "invalid arguments given. See --help for more info.",
     nofile= "cannot open file ",
-    help  = name .. "\
-Usage: " .. arg[0] .. [[ [FLAG] [FILE]
-
-Valid flags:  --LANG  analyze source code using parsing options for LANG
- ]] .. [[             --help  this help message
-
-Valid options for LANG: ]] .. langs.list
+    help  = function()
+        print(name)
+        print("Usage: " .. arg[0] .. " [FLAG] [FILE]\n")
+        print("Valid flags: --LANG  analyze source code parsing it as LANG")
+        print("             --help  this help message\n")
+        print("Valid LANGs: " .. langs.list)
+    end
 }
 stats = {
     header = "no", -- Changed if found later
@@ -38,11 +45,6 @@ stats = {
     ecount = 0  -- Empty
 }
 -- functions
-function err(m, f)
-    if not f then f = "" end
-    print("error: " .. m .. f)
-    os.exit(1)
-end
 function balancePrint(offset, t, stat)
     print(t .. string.rep(" ", offset - ( string.len(t) + string.len(stat) )) .. stat)
 end
@@ -96,7 +98,7 @@ end
 if not arg[1] then
     err(msg.noarg)
 elseif ( arg[1] == "--help" ) then
-    print(msg.help)
+    msg.help()
     os.exit()
 end
 for i = 1, #langs do
