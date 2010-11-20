@@ -10,7 +10,7 @@ function err(m, f)
     os.exit(1)
 end
 if not io.open(langs.file .. ".lua", "r") then
-    err("unable to open config file ", langs.file)
+    err("unable to open config file ", langs.file .. ".lua")
 end
 require(langs.file)
 for i = 1, #langs do
@@ -20,13 +20,14 @@ for i = 1, #langs do
         langs.list = langs.list .. " " .. langs[i].name
     end
 end
--- Read version and usage from self - make pattern-matching instead of hard-coded pos?
+-- Read version and usage from self
 io.input(arg[0])
-for i = 1, 2 do
-     name = io.read()
+name = ""
+while not string.match(name, "^%-%-%s-(codestats%.lua.*)$") or not io.read() do
+    name = io.read()
 end
-io.input():close()
-name = string.gsub(name, "^%-%-%s+", "")
+io.close()
+name = string.gsub(name, "^%W*", "")
 msg = {
     noarg = "invalid arguments given. See --help for more info.",
     nofile= "cannot open file ",
