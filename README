@@ -1,0 +1,35 @@
+Readme for codestats.lua
+
+codestats.lua is a lua script for analyzing plaintext source code of various 
+languages. It currently is in a rather simple form, but more advanced 
+algorithms for language recognisation, line counting, and so on. More 
+statistics will also be added by time.
+
+As of version 1.1.4, the requirements for running codestats.lua is merely a 
+Lua 5.1-compliant interpreter. No external calls are made, and the script 
+should therefore be platform independent. It has however not been tested on 
+other platforms than GNU/Linux.
+
+The functions of codestats.lua are rudimentary. The syntax is simple:
+    ./codestats.lua file.ext
+codestats.lua will try to understand what language the file is written in, by 
+looking at its extension. If it does not understand the extension, you may run 
+it with a language flag to force the use of this language:
+    ./codestats.lua --language file.ext
+Note that using the wrong language option may result in undesirable results. 
+Use at own risk.
+
+Depending on the language of the file analyzed, the output may present various 
+information. The currently implemented information includes:
+    File        filename
+    Size        size in B, kiB, or MiB (controlled by getSize())
+    Language    language of the file (as reported; not necessarily correct)
+    Header      if an interpreted language: does code have #! header?
+    Code        amount of non-comment and non-empty lines
+    Comment     amount of lines matching the comment pattern(s)
+    Comment #2  if a second kind of comments exist; see Comment above
+    Empty       amount of empty lines (or containing only whitespace)
+    Total       total amount of lines parsed, excluding the eventual header
+
+Yes, this is a hacked-together solution. No, should not be used for anything 
+important.
