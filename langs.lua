@@ -57,7 +57,7 @@ langs = {
         ending  = "html?",
         longOpen= "^%s-%<%!%-%-",
         longEnd = "%-%-%>",
-        header  = "^%s-%<%!DOCTYPE [hHtTmMlL]+"
+        header  = "^%s-%<%!DOCTYPE%s-[hHtTmMlL]+"
     },
     {
         name    = "ruby",
