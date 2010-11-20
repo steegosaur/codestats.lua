@@ -2,6 +2,7 @@
 -- langs.lua - language config file for codestats.lua
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
+sHeader = "^#%!/[%w%s/_%.]+"
 langs = {
     {
         name    = "lua",
@@ -9,13 +10,13 @@ langs = {
         comment = "^%s-%-%-",
         longOpen= "%-%-%[%[",
         longEnd = "%-%-%]%]",
-        header  = "^#%!/[%w%s/_%.]+lua.*"
+        header  = sHeader .. "lua"
     },
     {
         name    = "bash",
         ending  = "sh",
         comment = "^%s-#",
-        header  = "^#%!/bin/bash"
+        header  = sHeader .. "bash"
     },
     {
         name    = "c",
@@ -41,7 +42,7 @@ langs = {
         name    = "perl",
         ending  = "pl",
         comment = "^%s-#",
-        header  = "^#%!/[%w%s/_%.]+perl.*"
+        header  = sHeader .. "perl"
     },
     {
         name    = "php",
@@ -52,19 +53,33 @@ langs = {
         longEnd = "%*/"
     },
     {
+        name    = "html",
+        ending  = "html?",
+        longOpen= "^%s-%<%!%-%-",
+        longEnd = "%-%-%>",
+        header  = "^%s-%<%!DOCTYPE [hHtTmMlL]+"
+    },
+    {
+        name    = "ruby",
+        ending  = "rb",
+        comment = "^%s-#",
+        header  = sHeader .. "ruby"
+    },
+    {
         name    = "io",
         ending  = "io",
         comment = "%/%/",
         xomment = "#",
         longOpen= "/%*",
         longEnd = "%*/",
-        header  = "#%!/[%w%s/_%.]+io.*"
+        header  = sHeader .. "io"
     },
     {
         name    = "lolcode",
         ending  = "lol",
         comment = "^%s-BTW",
         longOpen= "OBTW",
-        longEnd = "TLDR"
+        longEnd = "TLDR",
+        header  = "HAI"
     },
 }
