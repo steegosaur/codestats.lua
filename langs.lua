@@ -40,7 +40,7 @@ langs = {
     },
     {
         name    = "perl",
-        ending  = "pl",
+        ending  = "p[lm]",
         comment = "^%s-#",
         header  = sHeader .. "perl"
     },
