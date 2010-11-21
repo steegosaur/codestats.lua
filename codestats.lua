@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
--- codestats.lua 1.2.1 - analyze source code
+-- codestats.lua 1.3.0 - analyze source code
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
 -- {{{ Init
@@ -29,9 +29,10 @@ end
 io.close()
 name = string.gsub(name, "^%W*", "")
 msg = {
-    noarg = "invalid arguments given. See --help for more info.",
-    nofile= "cannot open file ",
-    help  = function()
+    noarg  = "invalid arguments given. See --help for more info.",
+    nofile = "cannot open file ",
+    lFound = "language recognised by means of ", -- for debug purposes
+    help   = function()
         print(name)
         print("Usage: " .. arg[0] .. " [FLAG] [FILE]\n")
         print("Valid flags: --LANG  analyze source code parsing it as LANG")
@@ -61,7 +62,7 @@ function stats.print()
         table.insert(s, { name = "Header", data = stats.header })
     end
     for i = 1, #s do
-        balancePrint(30, s[i].name, s[i].data)
+        balancePrint(30, s[i].name .. " ", s[i].data)
     end
     print()
     local d = {
@@ -107,30 +108,45 @@ elseif ( arg[1] == "--help" ) then
     msg.help()
     os.exit()
 end
-for i = 1, #langs do
-    if string.match(arg[1], "%." .. langs[i].ending .. "$") then
-        lnum = i
-        argAcpt = true
-        inFile = arg[1]
-    end
-end
-if ( argAcpt ~= true ) then
-    i = 0
-    repeat
-        i = i + 1
+
+-- First check if a language has been forced - we don't want to overrule the user!
+if ( string.sub(arg[1], 1, 2) == "--" ) then
+    for i = 1, #langs do
         if ( arg[1] == "--" .. langs[i].name ) then
+            -- print(msg.lFound .. "command-line flag")
             lnum = i
-            argAcpt = true
             inFile = arg[2]
         end
-    until ( argAcpt == true ) or ( i == #langs )
+    end
+    if not lnum then err(msg.noarg) end -- LANG is not a supported language
+else -- LANG not specified, check for file header, then for file ending
+    inFile = arg[1] -- no --LANG means arg[1] should be a file; check:
+    if not io.open(inFile, "r") then err(msg.nofile, inFile) end
+    io.input(inFile)
+    local h
+    repeat
+        h = io.read()
+    until h
+    io.close()
+    for i = 1, #langs do -- Check for header
+        if langs[i].header and string.match(h, langs[i].header) then
+            -- print(msg.lFound .. "header")
+            lnum = i
+            break
+        end
+    end
+    if not lnum then -- Header not found; may be non-interpreted or without
+        ending = string.match(inFile, "[%w%p%s]+%.(%w+)$")
+        for i = 1, #langs do -- Check for file ending in filename
+            if ( ending == langs[i].ending ) then
+                -- print(msg.lFound .. "ending")
+                lnum = i
+                break
+            end
+        end
+    end
 end
-if ( argAcpt ~= true ) or not inFile then
-    err(msg.noarg)
-end
-if not io.open(inFile, "r") then
-    err(msg.nofile, inFile)
-end
+if not lnum then err(msg.noarg) end
 -- }}}
 
 -- {{{ Analyze

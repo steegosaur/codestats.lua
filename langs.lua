@@ -2,7 +2,7 @@
 -- langs.lua - language config file for codestats.lua
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
-sHeader = "^#%!/[%w%s/_%.]+"
+sHeader = "^#%!%/[%w%s/_%.]+"
 langs = {
     {
         name    = "lua",
@@ -33,7 +33,7 @@ langs = {
         longEnd = "%*/"
     },
     {
-        name    = "vb.net",
+        name    = "vbnet",
         ending  = "vb",
         xomment = "^%s-'''",
         comment = "^%s-'"
@@ -57,7 +57,14 @@ langs = {
         ending  = "html?",
         longOpen= "^%s-%<%!%-%-",
         longEnd = "%-%-%>",
-        header  = "^%s-%<%!DOCTYPE%s-[hHtTmMlL]+"
+        header  = "^%s-%<%!DOCTYPE%s+HTML"
+    },
+    {
+        name    = "xhtml",
+        ending  = "x?html?",
+        longOpen= "^%s-%<%!%-%-",
+        longEnd = "%-%-%>",
+        header  = "^%s-%<%!DOCTYPE%s+html"
     },
     {
         name    = "ruby",

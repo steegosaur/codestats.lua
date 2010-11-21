@@ -1,8 +1,7 @@
 Todo list for codestats.lua
 
 Add extraction of information (licence, etc) from file
-Clean up code
+Clean up code, comments
 Add support for more languages
     Python didn't want to work, try again
-    Ruby
     C# ?
