@@ -138,7 +138,7 @@ else -- LANG not specified, check for file header, then for file ending
     if not lnum then -- Header not found; may be non-interpreted or without
         ending = string.match(inFile, "[%w%p%s]+%.(%w+)$")
         for i = 1, #langs do -- Check for file ending in filename
-            if string.match(ending, langs[i].ending then
+            if string.match(ending, langs[i].ending) then
                 -- print(msg.lFound .. "ending")
                 lnum = i
                 break
