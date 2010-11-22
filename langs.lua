@@ -19,15 +19,15 @@ langs = {
         header  = sHeader .. "bash"
     },
     {
-        name    = "c",
-        ending  = "c",
+        name    = "cpp",
+        ending  = "cpp",
         comment = "%/%/",
         longOpen= "/%*",
         longEnd = "%*/"
     },
     {
-        name    = "cpp",
-        ending  = "cpp",
+        name    = "c",
+        ending  = "c",
         comment = "%/%/",
         longOpen= "/%*",
         longEnd = "%*/"
