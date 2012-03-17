@@ -42,6 +42,8 @@ langs = {
         name    = "perl",
         ending  = "p[lm]",
         comment = "^%s-#",
+       longOpen= "^=",
+       longEnd="^=cut",
         header  = sHeader .. "perl"
     },
     {
