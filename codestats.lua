@@ -190,6 +190,38 @@ msg = {
 }
 -- }}}
 
+-- {{{ Init
+require(langs.file)
+for _, lang in ipairs(langs) do
+    if not langs.list then
+        langs.list = lang.name
+    else
+        langs.list = langs.list .. " " .. lang.name
+    end
+end
+
+-- Read version and usage from self
+io.input(arg[0])
+name = ""
+while not name:match("^%-%-%s-(codestats%.lua.*)$") or not io.read() do
+    name = io.read()
+end
+io.close()
+name = name:gsub("^%W*", "")
+msg = {
+    noarg  = "invalid arguments given. See --help for more info.",
+    nofile = "cannot open file ",
+    lFound = "language recognised by means of ", -- for debug purposes
+    help   = function()
+        print(name)
+        print("Usage: " .. arg[0] .. " [FLAG] [FILE]\n")
+        print("Valid flags: --LANG  analyze source code parsing it as LANG")
+        print("             --help  this help message\n")
+        print("Valid LANGs: " .. langs.list)
+    end
+}
+-- }}}
+
 -- {{{ Sanity check
 if not arg[1] then
     err(msg.noarg)
