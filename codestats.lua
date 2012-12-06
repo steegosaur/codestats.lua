@@ -57,7 +57,8 @@ function stats.print()
         table.insert(d, 3, { name = "Comment #2", count = "xcount", perc = "xperc" })
     end
     for _, data in ipairs(d) do
-        print(data.name .. string.rep(" ", 18 - ( data.name:len() + string.len(stats[data.count]) )) .. stats[data.count] .. " (" .. string.rep(" ", 6 - string.len(stats[data.perc])) .. stats[data.perc] .. " % )")
+        local stat = stats[data.count] .. " (" .. string.rep(" ", 6 - string.len(stats[data.perc])) .. stats[data.perc] .. " % )"
+        balancePrint(30, data.name, stat)
     end
 end
 function round(n)
@@ -257,11 +258,18 @@ end
 -- }}}
 
 -- {{{ Present data
-if copyright then
-    print("Author: ", copyright.author, copyright.email, copyright.year)
+if verbose then
+    if copyright then
+        local c = { "Author", "Email", "Year" }
+        for _, field in ipairs(c) do
+            balancePrint(field, copyright[field:lower()])
+        end
+    end
+    if licence then
+        version = version or ""
+        balancePrint("Licence", licence .. " " .. version)
+    end
 end
-if licence then print("Licence: ", licence, version or "") end
-
 stats.tcount = stats.ccount + stats.lcount + stats.ecount + stats.xcount  -- Total count
 stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)  -- Comments
 stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)  -- Empty
