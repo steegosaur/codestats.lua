@@ -31,19 +31,20 @@ function err(m, f)
 end
 
 function balancePrint(offset, t, stat)
-    print(t .. string.rep(" ", offset - ( string.len(t) + string.len(stat) )) .. stat)
+    print(t .. string.rep(" ", offset - ( t:len() + stat:len() )) .. stat)
 end
+
 function stats.print()
     local s = {
         { name = "File", data = inFile },
         { name = "Size", data = stats.size },
-        { name = "Language", data = langs[lnum].name }
+        { name = "Language", data = flang.name }
     }
-    if langs[lnum].header then
+    if flang.header then
         table.insert(s, { name = "Header", data = stats.header })
     end
-    for i = 1, #s do
-        balancePrint(30, s[i].name .. " ", s[i].data)
+    for _, stat in ipairs(s) do
+        balancePrint(30, stat.name .. " ", stat.data)
     end
     print()
     local d = {
@@ -52,11 +53,11 @@ function stats.print()
         { name = "Empty",   count = "ecount", perc = "eperc" },
         { name = "Total",   count = "tcount", perc = "tperc" }
     }
-    if langs[lnum].xomment then
+    if flang.xomment then
         table.insert(d, 3, { name = "Comment #2", count = "xcount", perc = "xperc" })
     end
-    for i = 1, #d do
-        print(d[i].name .. string.rep(" ", 18 - ( string.len(d[i].name) + string.len(stats[d[i].count]) )) .. stats[d[i].count] .. " (" .. string.rep(" ", 6 - string.len(stats[d[i].perc])) .. stats[d[i].perc] .. " % )")
+    for _, data in ipairs(d) do
+        print(data.name .. string.rep(" ", 18 - ( data.name:len() + string.len(stats[data.count]) )) .. stats[data.count] .. " (" .. string.rep(" ", 6 - string.len(stats[data.perc])) .. stats[data.perc] .. " % )")
     end
 end
 function round(n)
@@ -68,10 +69,10 @@ function getSize(f)
         err("could not read file handle in function getSize()")
     end
     local l = f:seek("end")
-    if ( l >= 1048576 ) then
+    if l >= 1048576 then
         l = l / 1048576
         unit = "MiB"
-    elseif ( l >= 1024 ) then
+    elseif l >= 1024 then
         l = l / 1024
         unit = "kiB"
     else
@@ -127,22 +128,22 @@ end
 
 -- {{{ Init
 require(langs.file)
-for i = 1, #langs do
+for _, lang in ipairs(langs) do
     if not langs.list then
-        langs.list = langs[i].name
+        langs.list = lang.name
     else
-        langs.list = langs.list .. " " .. langs[i].name
+        langs.list = langs.list .. " " .. lang.name
     end
 end
 
 -- Read version and usage from self
 io.input(arg[0])
 name = ""
-while not string.match(name, "^%-%-%s-(codestats%.lua.*)$") or not io.read() do
+while not name:match("^%-%-%s-(codestats%.lua.*)$") or not io.read() do
     name = io.read()
 end
 io.close()
-name = string.gsub(name, "^%W*", "")
+name = name:gsub("^%W*", "")
 msg = {
     noarg  = "invalid arguments given. See --help for more info.",
     nofile = "cannot open file ",
@@ -160,21 +161,21 @@ msg = {
 -- {{{ Sanity check
 if not arg[1] then
     err(msg.noarg)
-elseif ( arg[1] == "--help" ) then
+elseif arg[1] == "--help" then
     msg.help()
     os.exit()
 end
 
 -- First check if a language has been forced - we don't want to overrule the user!
-if ( string.sub(arg[1], 1, 2) == "--" ) then
+if arg[1]:sub(1, 2) == "--" then
     for i, lang in ipairs(langs) do
-        if ( arg[1] == "--" .. lang.name ) then
+        if arg[1] == "--" .. lang.name then
             -- print(msg.lFound .. "command-line flag")
-            lnum = i
+            flang = lang
             inFile = arg[2]
         end
     end
-    if not lnum then err(msg.noarg) end -- LANG is not a supported language
+    if not flang then err(msg.noarg) end -- LANG is not a supported language
 else
     -- LANG not specified, check for file header, then for file ending
     inFile = arg[1] -- no --LANG means arg[1] should be a file; check:
@@ -185,55 +186,67 @@ else
         h = io.read()
     until h
     io.close()
-    for i = 1, #langs do -- Check for header
-        if langs[i].header and string.match(h, langs[i].header) then
+    for _, lang in pairs(langs) do -- Check for header
+        if lang.header and h:match(lang.header) then
             -- print(msg.lFound .. "header")
-            lnum = i
+            flang = lang
             break
         end
     end
-    if not lnum then -- Header not found; may be non-interpreted or without
-        ending = string.match(inFile, "[%w%p%s]+%.(%w+)$")
-        for i, lang in ipairs(langs) do -- Check for file ending in filename
-            if string.match(ending, langs[i].ending) then
+    if not flang then -- Header not found; may be non-interpreted or without
+        ending = inFile:match("[%w%p%s]+%.(%w+)$")
+        for _, lang in ipairs(langs) do -- Check for file ending in filename
+            if ending:match(lang.ending) then
                 -- print(msg.lFound .. "ending")
-                lnum = i
+                flang = lang
                 break
             end
         end
     end
 end
-if not lnum then err(msg.noarg) end
+if not flang then err(msg.noarg) end
 -- }}}
 
 -- {{{ Analyze
 f = io.open(inFile, "r")
 for line in f:lines() do
-    if longComment == true then
+    if line:match("^%s-$")      -- Empty line, with or without comment signs
+      or line:match("^%s-" .. flang.comment .. "%s-$") or
+      -- Following commented out because they will bug handling of longcomment
+--    ( flang.longOpen and line:match("^%s-" .. flang.comment .. "%s-$") ) or
+--    ( flang.longEnd  and line:match("^%s-" .. flang.comment .. "%s-$") ) or
+      ( flang.xomment  and line:match("^%s-" .. flang.xomment .. "%s-$") ) then
+        stats.ecount = stats.ecount + 1
+    elseif longComment == true then       -- Currently in a long comment
         stats.ccount = stats.ccount + 1
-        if line:match(langs[lnum].longEnd) then
+        if line:match(flang.longEnd) then -- End of longcomment
             longComment = false
         end
-    elseif langs[lnum].header   and ( stats.lcount == 0 ) and line:match(langs[lnum].header) then
+    elseif flang.header         -- We know of a header for the language
+      and stats.lcount == 0     -- There have been no lines of code yet
+      and line:match(flang.header) then
         stats.header = "yes"
-    elseif langs[lnum].longOpen and line:match(langs[lnum].longOpen) and line:match(langs[lnum].longEnd) then
+    elseif flang.longOpen       -- Language has longcomment feature
+      and line:match(flang.longOpen)
+      and line:match(flang.longEnd) then  -- Open/close on a single line
         stats.ccount = stats.ccount + 1
-    elseif langs[lnum].longOpen and line:match(langs[lnum].longOpen) then
+    elseif flang.longOpen
+      and line:match(flang.longOpen) then -- Longcomment start
         longComment = true
         stats.ccount = stats.ccount + 1
-    elseif langs[lnum].xomment  and line:match(langs[lnum].xomment) then
-        stats.xcount = stats.xcount + 1
-    elseif langs[lnum].comment  and line:match(langs[lnum].comment) then
+    elseif flang.xomment
+      and line:match(flang.xomment) then -- Other type of comment
+        stats.xcount = stats.xcount + 1  -- Should these be combined?
+    elseif flang.comment
+      and line:match(flang.comment) then -- Line is a comment
         stats.ccount = stats.ccount + 1
-    elseif line:match("^%s-$") then
-        stats.ecount = stats.ecount + 1
     else
-        stats.lcount = stats.lcount + 1
+        stats.lcount = stats.lcount + 1  -- Line is code
     end
     -- Analyse licence, ownership and more
     if ( longComment == true
-      or ( langs[lnum].comment and line:match(langs[lnum].comment) )
-      or ( langs[lnum].xomment and line:match(langs[lnum].xomment) ) )
+      or ( flang.comment and line:match(flang.comment) )
+      or ( flang.xomment and line:match(flang.xomment) ) )
       -- We presume the licence comes before the code; read if not exists
       and stats.lcount == 0 then
         if not copyright then copyright = getAuthor(line) end
@@ -241,16 +254,19 @@ for line in f:lines() do
         if not version   then version   = getLicenceVersion(line) end
     end
 end
+-- }}}
+
+-- {{{ Present data
 if copyright then
     print("Author: ", copyright.author, copyright.email, copyright.year)
 end
 if licence then print("Licence: ", licence, version or "") end
 
-stats.tcount = stats.ccount + stats.lcount + stats.ecount + stats.xcount
-stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)
-stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)
-stats.xperc = round(( stats.xcount * 100 ) / stats.tcount)
-stats.lperc = round(100 - ( stats.cperc + stats.eperc + stats.xperc))
+stats.tcount = stats.ccount + stats.lcount + stats.ecount + stats.xcount  -- Total count
+stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)  -- Comments
+stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)  -- Empty
+stats.xperc = round(( stats.xcount * 100 ) / stats.tcount)  -- Extra comments
+stats.lperc = round(100 - ( stats.cperc + stats.eperc + stats.xperc)) -- Code
 stats.tperc = round(stats.lperc + stats.eperc + stats.cperc + stats.xperc)
 stats.size  = getSize(f)
 stats.print()

@@ -42,6 +42,8 @@ langs = {
         name    = "perl",
         ending  = "p[lm]",
         comment = "^%s-#",
+        longOpen= "^=",
+        longEnd = "^=cut",
         header  = sHeader .. "perl"
     },
     {
@@ -55,16 +57,16 @@ langs = {
     {
         name    = "html",
         ending  = "html?",
-        longOpen= "^%s-%<%!%-%-",
-        longEnd = "%-%-%>",
-        header  = "^%s-%<%!DOCTYPE%s+HTML"
+        longOpen= "^%s-<!%-%-",
+        longEnd = "%-%->",
+        header  = "^%s-<!DOCTYPE%s+HTML"
     },
     {
         name    = "xhtml",
         ending  = "x?html?",
-        longOpen= "^%s-%<%!%-%-",
-        longEnd = "%-%-%>",
-        header  = "^%s-%<%!DOCTYPE%s+html"
+        longOpen= "^%s-<!%-%-",
+        longEnd = "%-%->",
+        header  = "^%s-<!DOCTYPE%s+html"
     },
     {
         name    = "ruby",
