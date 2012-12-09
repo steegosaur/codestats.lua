@@ -22,6 +22,20 @@ function stats.print()
         balancePrint(stat.name .. " ", stat.data)
     end
     print()
+    -- Show author/licence information
+    if verbose and not multiple then
+        if copyright then
+            local c = { "Author", "Email", "Year" }
+            for _, field in ipairs(c) do
+                balancePrint(field, copyright[field:lower()])
+            end
+        end
+        if licence then
+            version = version or ""
+            balancePrint("Licence", licence .. " " .. version)
+        end
+        if copyright or licence then print() end
+    end
     local d = {
         { name = "Code",    count = "lcount", perc = "lperc" },
         { name = "Comment", count = "ccount", perc = "cperc" },

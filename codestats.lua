@@ -171,18 +171,6 @@ end
 -- }}}
 
 -- {{{ Present data
-if verbose then
-    if copyright then
-        local c = { "Author", "Email", "Year" }
-        for _, field in ipairs(c) do
-            balancePrint(field, copyright[field:lower()])
-        end
-    end
-    if licence then
-        version = version or ""
-        balancePrint("Licence", licence .. " " .. version)
-    end
-end
 stats.tcount = stats.ccount + stats.lcount + stats.ecount + stats.xcount  -- Total count
 stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)  -- Comments
 stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)  -- Empty
