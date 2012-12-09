@@ -76,7 +76,7 @@ function getAuthor(line)
     if copyright then
         copyright = {}
         copyright.year = line:match("(%d%d%d%d%-?%d?%d?%d?%d?)")
-        copyright.author = line:match("[Rr][Ii][Gg][Hh][Tt]%s+(.+),")
+        copyright.author = line:match("[Rr][Ii][Gg][Hh][Tt]%s+([^,]+)[%s,]+%d?") or line:match("[Rr][Ee][Tt]+%s+([^,]+)[%s,]+%d?")
         copyright.email  = line:match("([^%s<]+@%S+%.[^%s>]+)")
     end
     return copyright
