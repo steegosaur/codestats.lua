@@ -2,7 +2,7 @@
 -- langs.lua - language config file for codestats.lua
 -- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
 -- Released under GPLv3+
-sHeader = "^#%!%/[%w%s/_%.]+"
+sHeader = "#%!%/[%w%s/_%.]+"
 langs = {
     {
         name    = "lua",
@@ -15,7 +15,7 @@ langs = {
     {
         name    = "bash",
         ending  = "sh",
-        comment = "^%s-#",
+        comment = "#",
         header  = sHeader .. "bash"
     },
     {
@@ -41,7 +41,7 @@ langs = {
     {
         name    = "perl",
         ending  = "p[lm]",
-        comment = "^%s-#",
+        comment = "#",
         longOpen= "^=",
         longEnd = "^=cut",
         header  = sHeader .. "perl"
@@ -50,7 +50,7 @@ langs = {
         name    = "php",
         ending  = "php",
         comment = "%/%/",
-        xomment = "^%s-#",
+        xomment = "#",
         longOpen= "/%*",
         longEnd = "%*/"
     },
@@ -66,12 +66,12 @@ langs = {
         ending  = "x?html?",
         longOpen= "^%s-<!%-%-",
         longEnd = "%-%->",
-        header  = "^%s-<!DOCTYPE%s+html"
+        header  = "%s-<!DOCTYPE%s+html"
     },
     {
         name    = "ruby",
         ending  = "rb",
-        comment = "^%s-#",
+        comment = "#",
         header  = sHeader .. "ruby"
     },
     {
@@ -86,9 +86,15 @@ langs = {
     {
         name    = "lolcode",
         ending  = "lol",
-        comment = "^%s-BTW",
+        comment = "BTW",
         longOpen= "OBTW",
         longEnd = "TLDR",
         header  = "HAI"
+    },
+    {
+        name    = "markdown",
+        ending  = "mk?d",
+        comment = "#",              -- Here, comment means header, any level
+        xomment = "[=-][=-][=-]"    -- And xomment is other type of header (conflicts w/hr-line)
     },
 }

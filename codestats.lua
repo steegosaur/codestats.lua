@@ -78,7 +78,7 @@ for i, flag in ipairs(arg) do
         io.close()
         if not flang then
             for _, lang in pairs(langs) do -- Check for header
-                if lang.header and h:match(lang.header) then
+                if lang.header and h:match("^" .. lang.header) then
                     -- print(msg.lFound .. "header")
                     flang = lang
                     break
@@ -149,10 +149,10 @@ for line in f:lines() do
         longComment = true
         stats.ccount = stats.ccount + 1
     elseif flang.xomment
-      and line:match(flang.xomment) then -- Other type of comment
+      and line:match("^%s-" .. flang.xomment) then -- Other type of comment
         stats.xcount = stats.xcount + 1  -- Should these be combined?
     elseif flang.comment
-      and line:match(flang.comment) then -- Line is a comment
+      and line:match("^%s-" .. flang.comment) then -- Line is a comment
         stats.ccount = stats.ccount + 1
     else
         stats.lcount = stats.lcount + 1  -- Line is code
