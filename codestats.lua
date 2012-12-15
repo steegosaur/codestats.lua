@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
--- codestats.lua 1.4-beta - analyze source code
+-- codestats.lua 1.4.0 - analyze source code
 -- Copyright Stæld Lakorv, 2010-2012 <staeld@illumine.ch>
 -- Released under GPLv3+
 -- {{{ Functions, vars
