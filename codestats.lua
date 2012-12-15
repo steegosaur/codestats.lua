@@ -1,5 +1,5 @@
 #!/usr/bin/env lua
--- codestats.lua 1.4-beta - analyze source code
+-- codestats.lua 1.4.0 - analyze source code
 -- Copyright Stæld Lakorv, 2010-2012 <staeld@illumine.ch>
 -- Released under GPLv3+
 -- {{{ Functions, vars
@@ -15,6 +15,7 @@ stats = {
     total  = {},
 }
 
+-- Internal error handling, prettier than error()
 function err(m, f)
     if not f then f = "" end
     print("error: " .. m .. f)
@@ -23,7 +24,8 @@ end
 -- }}}
 
 -- {{{ Init
-for _, f in ipairs(file) do require(f) end
+for _, f in ipairs(file) do require(f) end  -- Get the required files
+-- Generate list of valid languages for use in help message
 for _, lang in ipairs(langs) do
     if not langs.list then
         langs.list = lang.name
@@ -104,21 +106,19 @@ for i, flag in ipairs(arg) do
                 break
             end
         end
-        if not recognised then
+        if not recognised then -- it was probably a language
             for _, lang in ipairs(langs) do
-                if flag == lang.name or flag:match(lang.ending) then
+                if flag == lang.name or flag:match("^" .. lang.ending .. "$") then
                     flang = lang
                     recognised = true
                     break
                 end
             end
         end
-        if not recognised then
-            err(msg.noarg)
-        end
+        if not recognised then err(msg.noarg) end
     end
 end
-if not flang then err(msg.noarg) end
+if not flang then err(msg.noarg) end    -- We couldn't determine the language
 -- }}}
 
 -- {{{ Analyze
