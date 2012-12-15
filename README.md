@@ -19,9 +19,9 @@ The functions of `codestats.lua` are rudimentary. The syntax is simple:
 `codestats.lua` will try to understand what language the file is written in,
 by first checking whether it contains a recognised file header or (if no
 header) by looking at its extension. If it does not understand the extension,
-you may run it with a language flag to force the use of this language:
+you may run it with a language flag to force it, like
 
-    ./codestats.lua --language file.ext
+    ./codestats.lua --perl somefile
 
 Note that using the wrong language option may result in undesirable results. 
 Use at own risk. 
@@ -42,6 +42,14 @@ information. The currently implemented information includes:
     Comment #2  if a second kind of comments exist; see Comment above
     Empty       amount of empty lines (or containing only whitespace)
     Total       total amount of lines parsed, excluding the eventual header
+
+In addition, the following may be extracted with the `--verbose` flag if found
+found in a supported format:
+
+    Author      name of the author
+    Email       email address of author
+    Year        year of creation/copyright
+    Licence     specified licence of software
 
 Yes, this is a hacked-together solution. No, it should *not* be used for
 anything important.

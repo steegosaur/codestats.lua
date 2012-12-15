@@ -1,6 +1,7 @@
 Todo list for codestats.lua
 
 [_] Implement support for batch-processing several files
+[_] Read code from args to support command pipelines
 [x] Add extraction of information (licence, etc) from file
 [/] Clean up code, comments
 

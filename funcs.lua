@@ -46,9 +46,9 @@ function stats.print()
         table.insert(d, 3, { name = "Comment #2", code = "x" })
     end
     for _, data in ipairs(d) do
-        local data.count = data.code .. "count"
-        local data.perc  = data.code .. "perc"
-        local stat = stats[data.count] .. " (" .. string.rep(" ", 6 - string.len(stats[data.perc])) .. stats[data.perc] .. " % )"
+        local count = data.code .. "count"
+        local perc  = data.code .. "perc"
+        local stat  = stats[count] .. " (" .. string.rep(" ", 6 - string.len(stats[perc])) .. stats[perc] .. " % )"
         balancePrint(data.name, stat)
     end
 end
