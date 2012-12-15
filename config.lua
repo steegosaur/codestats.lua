@@ -1,6 +1,7 @@
 -- config.lua - Various configuration and variables for codestats.lua
 -- Copyright Stæld Lakorv, 2012 <staeld@illumine.ch>
 
+-- Width to use when printing right-aligned figures
 offset = 30
 -- Supported flags for execution
 flags = {

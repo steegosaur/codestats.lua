@@ -1,11 +1,11 @@
 -- funcs.lua - Functions library for codestats.lua
 -- Copyright Stæld Lakorv, 2012 <staeld@illumine.ch>
 
-function flags.activate(flag)
+function flags.activate(flag)   -- Call the function of a --flag
     flags[flag]()
 end
 
-function balancePrint(t, stat)
+function balancePrint(t, stat)  -- Print out with right-alignment
     print(t .. string.rep(" ", offset - ( t:len() + stat:len() )) .. stat)
 end
 
@@ -31,21 +31,23 @@ function stats.print()
             end
         end
         if licence then
-            version = version or ""
-            balancePrint("Licence", licence .. " " .. version)
+            if version then version = " " .. version else version = "" end
+            balancePrint("Licence", licence .. version)
         end
         if copyright or licence then print() end
     end
     local d = {
-        { name = "Code",    count = "lcount", perc = "lperc" },
-        { name = "Comment", count = "ccount", perc = "cperc" },
-        { name = "Empty",   count = "ecount", perc = "eperc" },
-        { name = "Total",   count = "tcount", perc = "tperc" }
+        { name = "Code",    code = "l" },
+        { name = "Comment", code = "c" },
+        { name = "Empty",   code = "e" },
+        { name = "Total",   code = "t" }
     }
     if flang.xomment then
-        table.insert(d, 3, { name = "Comment #2", count = "xcount", perc = "xperc" })
+        table.insert(d, 3, { name = "Comment #2", code = "x" })
     end
     for _, data in ipairs(d) do
+        local data.count = data.code .. "count"
+        local data.perc  = data.code .. "perc"
         local stat = stats[data.count] .. " (" .. string.rep(" ", 6 - string.len(stats[data.perc])) .. stats[data.perc] .. " % )"
         balancePrint(data.name, stat)
     end
