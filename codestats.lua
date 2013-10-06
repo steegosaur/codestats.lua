@@ -178,10 +178,11 @@ for inFile, t in pairs(inFiles) do
           or ( flang.comment and line:match(flang.comment) )
           or ( flang.xomment and line:match(flang.xomment) ) )
           -- We presume the licence comes before the code; read if not exists
-          and stats[inFile].lcount == 0 then
-            if not copyright then copyright = getAuthor(line) end
-            if not licence   then licence   = getLicence(line) end
-            if not version   then version   = getLicenceVersion(line) end
+          -- and stats[inFile].lcount == 0 then -- FIXME: Doesn't work for some reason
+          then
+            if not stats[inFile].copyright then stats[inFile].copyright = getAuthor(line) end
+            if not stats[inFile].licence   then stats[inFile].licence   = getLicence(line) end
+            if not stats[inFile].version   then stats[inFile].version   = getLicenceVersion(line) end
         end
     end
     -- }}}

@@ -1,5 +1,5 @@
 -- funcs.lua - Functions library for codestats.lua
--- Copyright Stæld Lakorv, 2012 <staeld@illumine.ch>
+-- Copyright Stæld Lakorv, 2012-2013 <staeld@illumine.ch>
 
 function flags.activate(flag)   -- Call the function of a --flag
     flags[flag]()
@@ -23,18 +23,18 @@ function stats.print(inFile)
     end
     print()
     -- Show author/licence information
-    if verbose and not multiple then
-        if copyright then
+    if verbose then
+        if stats[inFile].copyright then
             local c = { "Author", "Email", "Year" }
             for _, field in ipairs(c) do
-                balancePrint(field, copyright[field:lower()])
+                balancePrint(field, stats[inFile].copyright[field:lower()])
             end
         end
-        if licence then
-            if version then version = " " .. version else version = "" end
-            balancePrint("Licence", licence .. version)
+        if stats[inFile].licence then
+            if stats[inFile].version then stats[inFile].version = " " .. stats[inFile].version else stats[inFile].version = "" end
+            balancePrint("Licence", stats[inFile].licence .. stats[inFile].version)
         end
-        if copyright or licence then print() end
+        if stats[inFile].copyright or stats[inFile].licence then print() end
     end
     local d = {
         { name = "Code",    code = "l" },
