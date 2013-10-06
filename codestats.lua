@@ -42,7 +42,7 @@ msg = {
     lFound = "language recognised by means of ", -- for debug purposes
     help   = function()
         print(name)
-        print("Usage: " .. arg[0] .. " [FLAG] [FILE]\n")
+        print("Usage: " .. arg[0] .. " [FLAG] [FILE] [FLAG] [FILE2] […]\n")
         print("Valid flags: --LANG  analyze source code parsing it as LANG")
         print("             --help  this help message\n")
         print("Valid LANGs: " .. langs.list)
