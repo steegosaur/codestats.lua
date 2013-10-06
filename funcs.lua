@@ -9,14 +9,14 @@ function balancePrint(t, stat)  -- Print out with right-alignment
     print(t .. string.rep(" ", offset - ( t:len() + stat:len() )) .. stat)
 end
 
-function stats.print()
+function stats.print(inFile)
     local s = {
         { name = "File", data = inFile },
-        { name = "Size", data = stats.size },
+        { name = "Size", data = stats[inFile].size },
         { name = "Language", data = flang.name }
     }
     if flang.header then
-        table.insert(s, { name = "Header", data = stats.header })
+        table.insert(s, { name = "Header", data = stats[inFile].header })
     end
     for _, stat in ipairs(s) do
         balancePrint(stat.name .. " ", stat.data)
@@ -48,7 +48,7 @@ function stats.print()
     for _, data in ipairs(d) do
         local count = data.code .. "count"
         local perc  = data.code .. "perc"
-        local stat  = stats[count] .. " (" .. string.rep(" ", 6 - string.len(stats[perc])) .. stats[perc] .. " % )"
+        local stat  = stats[inFile][count] .. " (" .. string.rep(" ", 6 - string.len(stats[inFile][perc])) .. stats[inFile][perc] .. " % )"
         balancePrint(data.name, stat)
     end
 end

@@ -1,19 +1,13 @@
 #!/usr/bin/env lua
--- codestats.lua 1.4.0 - analyze source code
--- Copyright Stæld Lakorv, 2010-2012 <staeld@illumine.ch>
+-- codestats.lua 1.5.0 - analyze source code
+-- Copyright Stæld Lakorv, 2010-2013 <staeld@illumine.ch>
 -- Released under GPLv3+
+
 -- {{{ Functions, vars
-langs = {}
-file = { "config", "funcs", "langs" }
-stats = {
-    header = "no", -- Changed if found later
-    lcount = 0, -- Lines of code
-    ccount = 0, -- Comments
-    xcount = 0, -- Comments of special type
-    tcount = 0, -- Total
-    ecount = 0, -- Empty
-    total  = {},
-}
+langs   = {}
+stats   = {}
+file    = { "config", "funcs", "langs" }
+inFiles = {} -- Container that keeps the files we'll analyse
 
 -- Internal error handling, prettier than error()
 function err(m, f)
@@ -68,7 +62,9 @@ end
 for i, flag in ipairs(arg) do
     if flag:match("^[^-]") then
         -- Flag is not a switch; presume input file
-        inFile = arg[i]
+        -- Add file to the input files list
+        local inFile = arg[i]
+        inFiles[inFile] = {}
         if not io.open(inFile, "r") then err(msg.nofile, inFile) end
         io.input(inFile)
         local h
@@ -76,6 +72,8 @@ for i, flag in ipairs(arg) do
             h = io.read()
         until h
         io.close()
+        -- flang can be set several times; always use the latest one
+        --+ This should allow for use like `--lua test.lua --py test.py test2.py`
         if not flang then
             for _, lang in pairs(langs) do -- Check for header
                 if lang.header and h:match("^" .. lang.header) then
@@ -95,6 +93,8 @@ for i, flag in ipairs(arg) do
                 end
             end
         end
+        if not flang then err(msg.noarg) end    -- We couldn't determine the language
+        inFiles[inFile].flang = flang
     elseif flag:match("^%-%-") then
         -- Flag *is* a switch
         flag = flag:gsub("^%-%-", "")
@@ -118,66 +118,83 @@ for i, flag in ipairs(arg) do
         if not recognised then err(msg.noarg) end
     end
 end
-if not flang then err(msg.noarg) end    -- We couldn't determine the language
 -- }}}
 
--- {{{ Analyze
-f = io.open(inFile, "r")
-for line in f:lines() do
-    if line:match("^%s-$")      -- Empty line, with or without comment signs
-      or line:match("^%s-" .. flang.comment .. "%s-$") or
-      -- Following commented out because they will bug handling of longcomment
---    ( flang.longOpen and line:match("^%s-" .. flang.comment .. "%s-$") ) or
---    ( flang.longEnd  and line:match("^%s-" .. flang.comment .. "%s-$") ) or
-      ( flang.xomment  and line:match("^%s-" .. flang.xomment .. "%s-$") ) then
-        stats.ecount = stats.ecount + 1
-    elseif longComment == true then       -- Currently in a long comment
-        stats.ccount = stats.ccount + 1
-        if line:match(flang.longEnd) then -- End of longcomment
-            longComment = false
-        end
-    elseif flang.header         -- We know of a header for the language
-      and stats.lcount == 0     -- There have been no lines of code yet
-      and line:match(flang.header) then
-        stats.header = "yes"
-    elseif flang.longOpen       -- Language has longcomment feature
-      and line:match(flang.longOpen)
-      and line:match(flang.longEnd) then  -- Open/close on a single line
-        stats.ccount = stats.ccount + 1
-    elseif flang.longOpen
-      and line:match(flang.longOpen) then -- Longcomment start
-        longComment = true
-        stats.ccount = stats.ccount + 1
-    elseif flang.xomment
-      and line:match("^%s-" .. flang.xomment) then -- Other type of comment
-        stats.xcount = stats.xcount + 1  -- Should these be combined?
-    elseif flang.comment
-      and line:match("^%s-" .. flang.comment) then -- Line is a comment
-        stats.ccount = stats.ccount + 1
+local first = true
+for inFile, t in pairs(inFiles) do
+    if first then
+        first = false
     else
-        stats.lcount = stats.lcount + 1  -- Line is code
+        print("\n----\n")
     end
-    -- Analyse licence, ownership and more
-    if ( longComment == true
-      or ( flang.comment and line:match(flang.comment) )
-      or ( flang.xomment and line:match(flang.xomment) ) )
-      -- We presume the licence comes before the code; read if not exists
-      and stats.lcount == 0 then
-        if not copyright then copyright = getAuthor(line) end
-        if not licence   then licence   = getLicence(line) end
-        if not version   then version   = getLicenceVersion(line) end
+    stats[inFile] = {
+        header = "no", -- Changed if found later
+        lcount = 0, -- Lines of code
+        ccount = 0, -- Comments
+        xcount = 0, -- Comments of special type
+        tcount = 0, -- Total
+        ecount = 0, -- Empty
+        total  = {}
+    }
+    local flang = t.flang
+    -- {{{ Analyze
+    f = io.open(inFile, "r")
+    for line in f:lines() do
+        if line:match("^%s-$")      -- Empty line, with or without comment signs
+          or line:match("^%s-" .. flang.comment .. "%s-$") or
+          -- Following commented out because they will bug handling of longcomment
+    --    ( flang.longOpen and line:match("^%s-" .. flang.comment .. "%s-$") ) or
+    --    ( flang.longEnd  and line:match("^%s-" .. flang.comment .. "%s-$") ) or
+          ( flang.xomment  and line:match("^%s-" .. flang.xomment .. "%s-$") ) then
+            stats[inFile].ecount = stats[inFile].ecount + 1
+        elseif longComment == true then       -- Currently in a long comment
+            stats[inFile].ccount = stats[inFile].ccount + 1
+            if line:match(flang.longEnd) then -- End of longcomment
+                longComment = false
+            end
+        elseif flang.header         -- We know of a header for the language
+          and stats[inFile].lcount == 0     -- There have been no lines of code yet
+          and line:match(flang.header) then
+            stats[inFile].header = "yes"
+        elseif flang.longOpen       -- Language has longcomment feature
+          and line:match(flang.longOpen)
+          and line:match(flang.longEnd) then  -- Open/close on a single line
+            stats[inFile].ccount = stats[inFile].ccount + 1
+        elseif flang.longOpen
+          and line:match(flang.longOpen) then -- Longcomment start
+            longComment = true
+            stats[inFile].ccount = stats[inFile].ccount + 1
+        elseif flang.xomment
+          and line:match("^%s-" .. flang.xomment) then -- Other type of comment
+            stats[inFile].xcount = stats[inFile].xcount + 1  -- Should these be combined?
+        elseif flang.comment
+          and line:match("^%s-" .. flang.comment) then -- Line is a comment
+            stats[inFile].ccount = stats[inFile].ccount + 1
+        else
+            stats[inFile].lcount = stats[inFile].lcount + 1  -- Line is code
+        end
+        -- Analyse licence, ownership and more
+        if ( longComment == true
+          or ( flang.comment and line:match(flang.comment) )
+          or ( flang.xomment and line:match(flang.xomment) ) )
+          -- We presume the licence comes before the code; read if not exists
+          and stats[inFile].lcount == 0 then
+            if not copyright then copyright = getAuthor(line) end
+            if not licence   then licence   = getLicence(line) end
+            if not version   then version   = getLicenceVersion(line) end
+        end
     end
+    -- }}}
+    
+    -- {{{ Present data
+    stats[inFile].tcount = stats[inFile].ccount + stats[inFile].lcount + stats[inFile].ecount + stats[inFile].xcount  -- Total count
+    stats[inFile].cperc = round(( stats[inFile].ccount * 100 ) / stats[inFile].tcount)  -- Comments
+    stats[inFile].eperc = round(( stats[inFile].ecount * 100 ) / stats[inFile].tcount)  -- Empty
+    stats[inFile].xperc = round(( stats[inFile].xcount * 100 ) / stats[inFile].tcount)  -- Extra comments
+    stats[inFile].lperc = round(100 - ( stats[inFile].cperc + stats[inFile].eperc + stats[inFile].xperc)) -- Code
+    stats[inFile].tperc = round(stats[inFile].lperc + stats[inFile].eperc + stats[inFile].cperc + stats[inFile].xperc)
+    stats[inFile].size  = getSize(f)
+    stats.print(inFile)
+    -- }}}
 end
--- }}}
-
--- {{{ Present data
-stats.tcount = stats.ccount + stats.lcount + stats.ecount + stats.xcount  -- Total count
-stats.cperc = round(( stats.ccount * 100 ) / stats.tcount)  -- Comments
-stats.eperc = round(( stats.ecount * 100 ) / stats.tcount)  -- Empty
-stats.xperc = round(( stats.xcount * 100 ) / stats.tcount)  -- Extra comments
-stats.lperc = round(100 - ( stats.cperc + stats.eperc + stats.xperc)) -- Code
-stats.tperc = round(stats.lperc + stats.eperc + stats.cperc + stats.xperc)
-stats.size  = getSize(f)
-stats.print()
--- }}}
 -- EOF
