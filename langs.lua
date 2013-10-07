@@ -1,8 +1,8 @@
 #!/usr/bin/env lua
 -- langs.lua - language config file for codestats.lua
--- Copyright Stæld Lakorv, 2010 <staeld@staeld.co.cc>
+-- Copyright Stæld Lakorv, 2010 <staeld@illumine.ch>
 -- Released under GPLv3+
-sHeader = "#%!%/[%w%s/_%.]+"
+script_header = "#%!%/[%w%s/_%.]+"
 langs = {
     {
         name    = "lua",
@@ -10,13 +10,13 @@ langs = {
         comment = "^%s-%-%-",
         longOpen= "%-%-%[%[",
         longEnd = "%-%-%]%]",
-        header  = sHeader .. "lua"
+        header  = script_header .. "lua"
     },
     {
         name    = "bash",
         ending  = "sh",
         comment = "#",
-        header  = sHeader .. "bash"
+        header  = script_header .. "bash"
     },
     {
         name    = "cpp",
@@ -44,7 +44,7 @@ langs = {
         comment = "#",
         longOpen= "^=",
         longEnd = "^=cut",
-        header  = sHeader .. "perl"
+        header  = script_header .. "perl"
     },
     {
         name    = "php",
@@ -72,7 +72,7 @@ langs = {
         name    = "ruby",
         ending  = "rb",
         comment = "#",
-        header  = sHeader .. "ruby"
+        header  = script_header .. "ruby"
     },
     {
         name    = "io",
@@ -81,7 +81,7 @@ langs = {
         xomment = "#",
         longOpen= "/%*",
         longEnd = "%*/",
-        header  = sHeader .. "io"
+        header  = script_header .. "io"
     },
     {
         name    = "lolcode",
@@ -95,6 +95,6 @@ langs = {
         name    = "markdown",
         ending  = "mk?d",
         comment = "#",              -- Here, comment means header, any level
-        xomment = "[=-][=-][=-]"    -- And xomment is other type of header (conflicts w/hr-line)
+        xomment = "[=-][=-][=-]"    -- And xomment is other type of header (NOTE: conflicts w/hr-line)
     },
 }

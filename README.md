@@ -1,16 +1,16 @@
 Readme for codestats.lua
 ========================
 
-`codestats.lua` is a lua script for analyzing plaintext source code of various 
-languages. It currently is in a rather simple form, and consists of the main 
+`codestats.lua` is a Lua script for analyzing plaintext source code of various 
+languages. It is currently in a rather simple form, and consists of the main 
 script file and a configuration file for the language information. More 
 advanced algorithms for language recognisation, line counting, and so on may be
 coming. More statistics will also be added by time.
 
-The only requirement for running `codestats.lua` is merely a Lua 5.1-compliant 
-interpreter. No external calls are made (files are handled with lua's 
+The only requirement for running `codestats.lua` is a Lua 5.1-compliant 
+interpreter. No external calls are made (files are handled with Lua's 
 built-in functions), and the script *should* therefore be platform independent. 
-It has however not been tested on other platforms than GNU/Linux.
+However, it has not been tested on other platforms than GNU/Linux.
 
 The functions of `codestats.lua` are rudimentary. The syntax is simple:
 
@@ -26,7 +26,8 @@ you may run it with a language flag to force it, like
 Note that using the wrong language option may result in undesirable results. 
 Use at own risk. 
 
-For a list of the currently enabled languages, use
+Languages can be specified, added and tweaked by modifying `langs.lua`. For a
+list of the currently enabled languages, use
 
     ./codestats.lua --help
 
@@ -35,16 +36,16 @@ information. The currently implemented information includes:
 
     File        filename
     Size        size in B, kiB, or MiB (controlled by getSize())
-    Language    language of the file (as reported; not necessarily correct)
-    Header      if an interpreted language: does code have #! header?
+    Language    language of the file (as reported; not necessarily correct!)
+    Header      if an interpreted language: does the code have a #! header?
     Code        amount of non-comment and non-empty lines
     Comment     amount of lines matching the comment pattern(s)
-    Comment #2  if a second kind of comments exist; see Comment above
+    Comment #2  if a second kind of comments exists (see Comment above)
     Empty       amount of empty lines (or containing only whitespace)
-    Total       total amount of lines parsed, excluding the eventual header
+    Total       total amount of lines parsed, excluding an eventual header
 
 In addition, the following may be extracted with the `--verbose` flag if found
-found in a supported format:
+in a supported format:
 
     Author      name of the author
     Email       email address of author
