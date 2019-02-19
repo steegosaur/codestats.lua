@@ -1,5 +1,5 @@
 #!/usr/bin/env lua5.3
--- codestats.lua 1.5.0 - analyze source code
+-- codestats.lua 1.6.0 - analyze source code
 -- Copyright Stæld Lakorv, 2010-2013; 2019 <staeld@illumine.ch>
 -- Released under GPLv3+
 
