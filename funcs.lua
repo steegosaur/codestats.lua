@@ -9,33 +9,45 @@ function balancePrint(t, stat)  -- Print out with right-alignment
     print(t .. string.rep(" ", offset - ( t:len() + stat:len() )) .. stat)
 end
 
-function stats.print(inFile)
-    local s = {
-        { name = "File", data = inFile },
-        { name = "Size", data = stats[inFile].size },
-        { name = "Language", data = flang.name }
-    }
-    if flang.header then
-        table.insert(s, { name = "Header", data = stats[inFile].header })
-    end
-    for _, stat in ipairs(s) do
-        balancePrint(stat.name .. " ", stat.data)
-    end
-    print()
-    -- Show author/licence information
-    if verbose then
-        if stats[inFile].copyright then
-            local c = { "Author", "Email", "Year" }
-            for _, field in ipairs(c) do
-                balancePrint(field, stats[inFile].copyright[field:lower()])
+function stats.percent(t) -- Calculate various percentages from a code stats table
+    t.cperc = round(( t.ccount * 100 ) / t.tcount)  -- Comments
+    t.eperc = round(( t.ecount * 100 ) / t.tcount)  -- Empty
+    t.xperc = round(( t.xcount * 100 ) / t.tcount)  -- Extra comments
+    t.lperc = round(100 - ( t.cperc + t.eperc + t.xperc)) -- Code
+    t.tperc = round(t.lperc + t.eperc + t.cperc + t.xperc)
+    return t
+end
+function stats.print(inFile, issummary)
+    local s
+    if not issummary then
+        s = {
+            { name = "File", data = inFile },
+            { name = "Size", data = stats[inFile].size },
+            { name = "Language", data = flang.name }
+        }
+        if flang.header then
+            table.insert(s, { name = "Header", data = stats[inFile].header })
+        end
+        for _, stat in ipairs(s) do
+            balancePrint(stat.name .. " ", stat.data)
+        end
+        print()
+        -- Show author/licence information
+        if verbose then
+            if stats[inFile].copyright then
+                local c = { "Author", "Email", "Year" }
+                for _, field in ipairs(c) do
+                    balancePrint(field, stats[inFile].copyright[field:lower()])
+                end
             end
+            if stats[inFile].licence then
+                if stats[inFile].version then stats[inFile].version = " " .. stats[inFile].version else stats[inFile].version = "" end
+                balancePrint("Licence", stats[inFile].licence .. stats[inFile].version)
+            end
+            if stats[inFile].copyright or stats[inFile].licence then print() end
         end
-        if stats[inFile].licence then
-            if stats[inFile].version then stats[inFile].version = " " .. stats[inFile].version else stats[inFile].version = "" end
-            balancePrint("Licence", stats[inFile].licence .. stats[inFile].version)
-        end
-        if stats[inFile].copyright or stats[inFile].licence then print() end
     end
+    if issummary then balancePrint("Total size ", stats[inFile].size) end -- Since it's not covered above
     local d = {
         { name = "Code",    code = "l" },
         { name = "Comment", code = "c" },
@@ -57,29 +69,32 @@ function round(n)
     return n
 end
 function getSize(f)
+    local bytes, size, unit
     if not ( type(f) == "userdata" ) then
-        err("could not read file handle in function getSize()")
+        bytes = f -- Assume f is actually a byte size
+    else
+        bytes = f:seek("end")
     end
-    local l = f:seek("end")
-    if l >= 1048576 then
-        l = l / 1048576
+    if bytes >= 1048576 then
+        size = bytes / 1048576
         unit = "MiB"
-    elseif l >= 1024 then
-        l = l / 1024
+    elseif bytes >= 1024 then
+        size = bytes / 1024
         unit = "kiB"
     else
+        size = bytes
         unit = "B"
     end
-    l = string.format("%.1f " .. unit, l)
-    return l
+    size = string.format("%.1f " .. unit, size)
+    return size, bytes
 end
 function getAuthor(line)
-    local copyright = line:lower():find("copyright") or line:find("%S+@%S+%.%S+") or line:find("auth[o:]")
+    local copyright = line:lower():find("copyright") or line:find("%s%([Cc]%)%s") or line:find("%S+@%S+%.%S+") or line:find("auth[o:]")
     if copyright then
         copyright = {}
-        copyright.year = line:match("(%d%d%d%d%-?%d?%d?%d?%d?)")
-        copyright.author = line:match("[Rr][Ii][Gg][Hh][Tt]%s+([^,]+)[%s,]+%d?") or line:match("[Rr][Ee][Tt]+%s+([^,]+)[%s,]+%d?")
-        copyright.email  = line:match("([^%s<]+@%S+%.[^%s>]+)")
+        copyright.year = line:match("(%d%d%d%d%-?%d?%d?%d?%d?)") or line:match("%([Cc]%)%s+(%d%d%d%d)")
+        copyright.author = line:match("[Rr][Ii][Gg][Hh][Tt][Ss]?%s+([^,%d]+)[%s,]+%d?") or line:match("[Rr][Ee][Tt]+%s+([^,]+)[%s,]+%d?") or line:match("%([Cc]%)%s+%d+[,%s]+([^%,]+)%.?$")
+        copyright.email  = line:match("([^%s<%(]+@%S+%.[^%s>%)]+)")
     end
     return copyright
 end
@@ -96,7 +111,7 @@ function getLicence(line)
             end
         end
     end
-    if licence == "Creative Commons" then
+    if licence == "Creative Commons" then -- TODO: Really should move this somewhere else and make it scalable
         local variant = ""
         local variants = { "nc", "nd", "sa", "by" }
         for _, word in ipairs(variants) do
@@ -115,4 +130,10 @@ function getLicenceVersion(line)
         if version then return version end
     end
     if not version then return nil end
+end
+function initTotalStats()
+    stats._total = {}
+    for _, s in ipairs({"tcount", "ccount", "ecount", "xcount", "lcount", "bytes"}) do
+        stats._total[s] = 0
+    end
 end

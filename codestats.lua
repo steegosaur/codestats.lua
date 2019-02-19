@@ -1,6 +1,6 @@
-#!/usr/bin/env lua
+#!/usr/bin/env lua5.3
 -- codestats.lua 1.5.0 - analyze source code
--- Copyright Stæld Lakorv, 2010-2013 <staeld@illumine.ch>
+-- Copyright Stæld Lakorv, 2010-2013; 2019 <staeld@illumine.ch>
 -- Released under GPLv3+
 
 -- {{{ Functions, vars
@@ -36,18 +36,6 @@ while not name:match("^%-%-%s-(codestats%.lua.*)$") or not io.read() do
 end
 io.close()
 name = name:gsub("^%W*", "")
-msg = {
-    noarg  = "invalid arguments given. See --help for more info.",
-    nofile = "cannot open file ",
-    lFound = "language recognised by means of ", -- for debug purposes
-    help   = function()
-        print(name)
-        print("Usage: " .. arg[0] .. " [FLAG] [FILE] [FLAG] [FILE2] […]\n")
-        print("Valid flags: --LANG  analyze source code parsing it as LANG")
-        print("             --help  this help message\n")
-        print("Valid LANGs: " .. langs.list)
-    end
-}
 -- }}}
 
 -- {{{ Sanity check
@@ -57,18 +45,18 @@ elseif arg[1] == "--help" then
     msg.help()
     os.exit()
 end
-
--- Check and apply other flags
+-- }}}
+-- {{{ Read command line input flags and files
 for i, flag in ipairs(arg) do
     if flag:match("^[^-]") then
-        -- Flag is not a switch; presume input file
+        -- Flag is not a switch; assume input file
         -- Add file to the input files list
         local inFile = arg[i]
         inFiles[inFile] = {}
         if not io.open(inFile, "r") then err(msg.nofile, inFile) end
         io.input(inFile)
         local h
-        repeat
+        repeat -- TODO: Check if this is actually needed or just really stupid
             h = io.read()
         until h
         io.close()
@@ -77,27 +65,27 @@ for i, flag in ipairs(arg) do
         if not flang then
             for _, lang in pairs(langs) do -- Check for header
                 if lang.header and h:match("^" .. lang.header) then
-                    -- print(msg.lFound .. "header")
+                    -- print(msg.lFound .. "header") -- Debuggers are for people who know what they're doing
                     flang = lang
                     break
                 end
             end
         end
-        if not flang then -- Header not found; may be non-interpreted or without
+        if not flang then -- Header not found; may be non-interpreted or without one
             ending = inFile:match("[%w%p%s]+%.(%w+)$")
             for _, lang in ipairs(langs) do -- Check for file ending in filename
                 if ending:match(lang.ending) then
-                    -- print(msg.lFound .. "ending")
+                    -- print(msg.lFound .. "ending") -- What is debugging even
                     flang = lang
                     break
                 end
             end
         end
-        if not flang then err(msg.noarg) end    -- We couldn't determine the language
+        if not flang then err(msg.noarg) end -- Couldn't determine the language
         inFiles[inFile].flang = flang
     elseif flag:match("^%-%-") then
         -- Flag *is* a switch
-        flag = flag:gsub("^%-%-", "")
+        flag = flag:lower():gsub("^%-%-", "")
         local recognised = false
         for f in pairs(flags) do
             if flag == f then
@@ -122,11 +110,8 @@ end
 
 local first = true
 for inFile, t in pairs(inFiles) do
-    if first then
-        first = false
-    else
-        print("\n----\n")
-    end
+    if first then first = false
+    elseif not dosumonly then print("\n----\n") end
     stats[inFile] = {
         header = "no", -- Changed if found later
         lcount = 0, -- Lines of code
@@ -173,29 +158,43 @@ for inFile, t in pairs(inFiles) do
         else
             stats[inFile].lcount = stats[inFile].lcount + 1  -- Line is code
         end
-        -- Analyse licence, ownership and more
-        if ( longComment == true
-          or ( flang.comment and line:match(flang.comment) )
-          or ( flang.xomment and line:match(flang.xomment) ) )
-          -- We presume the licence comes before the code; read if not exists
-          -- and stats[inFile].lcount == 0 then -- FIXME: Doesn't work for some reason
-          then
-            if not stats[inFile].copyright then stats[inFile].copyright = getAuthor(line) end
-            if not stats[inFile].licence   then stats[inFile].licence   = getLicence(line) end
-            if not stats[inFile].version   then stats[inFile].version   = getLicenceVersion(line) end
+        if verbose then
+            -- Analyse licence, ownership and more
+            if ( longComment == true
+              or ( flang.comment and line:match(flang.comment) )
+              or ( flang.xomment and line:match(flang.xomment) ) )
+              -- We assume the licence comes before the code; read if not exists
+              -- and stats[inFile].lcount == 0 then -- FIXME: Doesn't work for some reason
+            then
+                if not stats[inFile].copyright then stats[inFile].copyright = getAuthor(line) end
+                if not stats[inFile].licence   then stats[inFile].licence   = getLicence(line) end
+                if not stats[inFile].version   then stats[inFile].version   = getLicenceVersion(line) end
+            end
         end
     end
     -- }}}
-    
     -- {{{ Present data
     stats[inFile].tcount = stats[inFile].ccount + stats[inFile].lcount + stats[inFile].ecount + stats[inFile].xcount  -- Total count
-    stats[inFile].cperc = round(( stats[inFile].ccount * 100 ) / stats[inFile].tcount)  -- Comments
-    stats[inFile].eperc = round(( stats[inFile].ecount * 100 ) / stats[inFile].tcount)  -- Empty
-    stats[inFile].xperc = round(( stats[inFile].xcount * 100 ) / stats[inFile].tcount)  -- Extra comments
-    stats[inFile].lperc = round(100 - ( stats[inFile].cperc + stats[inFile].eperc + stats[inFile].xperc)) -- Code
-    stats[inFile].tperc = round(stats[inFile].lperc + stats[inFile].eperc + stats[inFile].cperc + stats[inFile].xperc)
-    stats[inFile].size  = getSize(f)
-    stats.print(inFile)
+    local bytes
+    stats[inFile].size, bytes = getSize(f)
+    if not dosumonly then
+        stats[inFile] = stats.percent(stats[inFile]) -- Add the percentages to the table (replaces it with updated version
+        stats.print(inFile)
+    end
+    if dosummary or dosumonly then
+        for _, s in ipairs({"tcount", "ccount", "ecount", "xcount", "lcount"}) do
+            stats._total[s] = stats._total[s] + stats[inFile][s]
+        end
+        stats._total.bytes = stats._total.bytes + bytes
+    end
     -- }}}
+end
+-- Do the summary if required
+if dosummary or dosumonly then
+--    if not first then print("\n----\n") end -- Uncomment to make summaries pretty; comment to make sumonly pretty
+    print("Total summary\n")
+    stats._total = stats.percent(stats._total)
+    stats._total.size = getSize(stats._total.bytes)
+    stats.print("_total", true)
 end
 -- EOF

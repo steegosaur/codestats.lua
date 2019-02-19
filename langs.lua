@@ -35,8 +35,8 @@ langs = {
     {
         name    = "vbnet",
         ending  = "vb",
-        xomment = "^%s-'''",
-        comment = "^%s-'"
+        comment = "^%s-'",
+        xomment = "^%s-'''"
     },
     {
         name    = "perl",
@@ -57,16 +57,25 @@ langs = {
     {
         name    = "html",
         ending  = "html?",
+        comment = "^%s-<!%-%-.-%-%->",
         longOpen= "^%s-<!%-%-",
         longEnd = "%-%->",
-        header  = "^%s-<!DOCTYPE%s+HTML"
+        header  = "^%s-<!DOCTYPE%s+[Hh][Tt][Mm][Ll]"
     },
     {
         name    = "xhtml",
         ending  = "x?html?",
+        comment = "^%s-<!%-%-.-%-%->",
         longOpen= "^%s-<!%-%-",
         longEnd = "%-%->",
         header  = "%s-<!DOCTYPE%s+html"
+    },
+    {
+        name    = "css",
+        ending  = "css",
+        comment = "^%s-/%*.-%*/",
+        longOpen= "/%*",
+        longEnd = "%*/"
     },
     {
         name    = "ruby",
@@ -94,7 +103,7 @@ langs = {
     {
         name    = "markdown",
         ending  = "mk?d",
-        comment = "#",              -- Here, comment means header, any level
-        xomment = "[=-][=-][=-]"    -- And xomment is other type of header (NOTE: conflicts w/hr-line)
+        comment = "^#",              -- Here, comment means header, any level
+        xomment = "^[=-][=-][=-]+$"    -- And xomment is other type of header (NOTE: conflicts w/hr-line)
     },
 }
