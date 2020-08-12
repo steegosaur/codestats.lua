@@ -3,22 +3,21 @@ Readme for codestats.lua
 
 `codestats.lua` is a Lua script for analyzing plaintext source code of various 
 languages. It is currently in a rather simple form, and consists of the main 
-script file and a configuration file for the language information. More 
-advanced algorithms for language recognisation, line counting, and so on may be
-coming. More statistics will also be added by time.
+script file and a configuration file for the language information. Note that 
+this script is not actively maintained and updates and rewrites are highly 
+unlikely.
+
+Note: This script has not undergone much testing at all. There will be bugs.
 
 The only requirement for running `codestats.lua` is a Lua 5.1-compliant 
-interpreter. (Update as of 2019-02-19: I am currently running it with lua5.3
+interpreter. (Update as of 2019-02-19: I am currently running it with Lua 5.3
 and have not noticed any abnormalities. YMMV.)
 
 No external calls are made (files are handled with Lua's built-in functions), 
 and the script *should* therefore be platform independent. However, it has 
 not been tested on other platforms than GNU/Linux.
 
-*This script in general has not undergone much testing at all. There will be 
-bugs.*
-
-The functions of `codestats.lua` are rudimentary. The syntax is simple:
+The functions of `codestats.lua` are rudimentary and the syntax is simple:
 
     ./codestats.lua file.ext
 
@@ -29,12 +28,9 @@ you may run it with a language flag to force it, like
 
     ./codestats.lua --perl somefile
 
-Note that using the wrong language option may result in undesirable results. 
-Use at own risk.
-
-Also note that the setting stays from the point at where it was set, so all 
-files after the flag are treated according to the flag. New flags can be set 
-at any point:
+Note that the setting stays from the point at where it was set, so all files 
+after the flag are treated according to the flag. New flags can be set at any 
+point:
 
     ./codestats.lua --perl somefile.pl --html index.html page2.html
 
@@ -56,8 +52,12 @@ information. The currently implemented information includes:
     Empty       amount of empty lines (or containing only whitespace)
     Total       total amount of lines parsed, excluding an eventual header
 
-A total summary is available with the flag `--summary`; if you only want the 
-summary, you can use `--sumonly` instead.
+Single-line comments are counted only if they begin the line (ie. there is no 
+code). Multi-line comments are counted from the line they begin on (ie. no 
+code is counted on that line).
+
+A total summary is available with the flag `--summary`; if you *only* want the 
+summary, you can use `--sumonly`.
 
 In addition, the following may be extracted with the `--verbose` flag if found
 in a supported format:
@@ -67,5 +67,3 @@ in a supported format:
     Year        year of creation/copyright
     Licence     specified licence of software
 
-Yes, this is a hacked-together solution. No, it should *not* be used for
-anything important.

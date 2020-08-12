@@ -1,8 +1,8 @@
 #!/usr/bin/env lua
 -- langs.lua - language config file for codestats.lua
 -- Copyright Stæld Lakorv, 2010 <staeld@illumine.ch>
--- Released under GPLv3+
-script_header = "#%!%/[%w%s/_%.]+"
+-- Released under the GNU GPLv3+
+script_header = "#!/[%w%s/_%.]+"
 langs = {
     {
         name    = "lua",
@@ -15,20 +15,20 @@ langs = {
     {
         name    = "bash",
         ending  = "sh",
-        comment = "#",
+        comment = "^%s*#",
         header  = script_header .. "bash"
     },
     {
         name    = "cpp",
         ending  = "cpp",
-        comment = "%/%/",
+        comment = "^%s*//",
         longOpen= "/%*",
         longEnd = "%*/"
     },
     {
         name    = "c",
         ending  = "c",
-        comment = "%/%/",
+        comment = "^%s*//",
         longOpen= "/%*",
         longEnd = "%*/"
     },
@@ -41,7 +41,7 @@ langs = {
     {
         name    = "perl",
         ending  = "p[lm]",
-        comment = "#",
+        comment = "^%s*#",
         longOpen= "^=",
         longEnd = "^=cut",
         header  = script_header .. "perl"
@@ -49,45 +49,45 @@ langs = {
     {
         name    = "php",
         ending  = "php",
-        comment = "%/%/",
-        xomment = "#",
+        comment = "^%s*//",
+        xomment = "^%s*#",
         longOpen= "/%*",
         longEnd = "%*/"
     },
     {
         name    = "html",
         ending  = "html?",
-        comment = "^%s-<!%-%-.-%-%->",
-        longOpen= "^%s-<!%-%-",
+        comment = "^%s*<!%-%-.-%-%->",
+        longOpen= "<!%-%-",
         longEnd = "%-%->",
-        header  = "^%s-<!DOCTYPE%s+[Hh][Tt][Mm][Ll]"
+        header  = "^%s*<!DOCTYPE%s+[Hh][Tt][Mm][Ll]"
     },
     {
         name    = "xhtml",
         ending  = "x?html?",
-        comment = "^%s-<!%-%-.-%-%->",
-        longOpen= "^%s-<!%-%-",
+        comment = "^%s*<!%-%-.-%-%->",
+        longOpen= "<!%-%-",
         longEnd = "%-%->",
-        header  = "%s-<!DOCTYPE%s+html"
+        header  = "^%s*<!DOCTYPE.*XHTML"
     },
     {
         name    = "css",
         ending  = "css",
-        comment = "^%s-/%*.-%*/",
+        comment = "^%s*/%*.-%*/",
         longOpen= "/%*",
         longEnd = "%*/"
     },
     {
         name    = "ruby",
         ending  = "rb",
-        comment = "#",
+        comment = "^%s*#",
         header  = script_header .. "ruby"
     },
     {
         name    = "io",
         ending  = "io",
-        comment = "%/%/",
-        xomment = "#",
+        comment = "^%s*//",
+        xomment = "^%s*#",
         longOpen= "/%*",
         longEnd = "%*/",
         header  = script_header .. "io"
@@ -95,7 +95,7 @@ langs = {
     {
         name    = "lolcode",
         ending  = "lol",
-        comment = "BTW",
+        comment = "^%s*BTW",
         longOpen= "OBTW",
         longEnd = "TLDR",
         header  = "HAI"
@@ -103,7 +103,14 @@ langs = {
     {
         name    = "markdown",
         ending  = "mk?d",
-        comment = "^#",              -- Here, comment means header, any level
-        xomment = "^[=-][=-][=-]+$"    -- And xomment is other type of header (NOTE: conflicts w/hr-line)
+        comment = "^#",             -- Here, comment means header, any level
+        xomment = "^[=-][=-][=-]+$" -- xomment is other type of header (NOTE: conflicts w/hr-line)
+    },
+    {
+        name    = "python",
+        ending  = "py",
+        comment = "^%s*#",
+        -- Unfortunately, Python uses the same syntax for multi-line quotes and strings, so no simple distinction can be made here
+        header  = script_header .. "python"
     },
 }

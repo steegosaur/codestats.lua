@@ -1,11 +1,11 @@
-Todo list for codestats.lua
+# Todo for codestats.lua
 
-[x] Implement support for batch-processing several files
-    [x] Show accumulative summary of all files
-[_] Read code from args to support command pipelines
-[x] Add extraction of information (licence, etc) from file
-[/] Clean up code, comments
+- [x] Implement support for batch-processing several files
+    - [x] Show accumulative summary of all files
+- [ ] Read code from args to support command pipelines
+- [x] Add extraction of information (licence, etc) from file
+- [/] Clean up code, comments
 
-Add support for more languages
-    Python didn't want to work, try again
-    C# ?
+- Add support for more languages
+    - [x] Python (no multi-line comments)
+    - C#, others?

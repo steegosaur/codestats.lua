@@ -1,5 +1,13 @@
 -- funcs.lua - Functions library for codestats.lua
--- Copyright Stæld Lakorv, 2012-2013 <staeld@illumine.ch>
+-- Copyright Stæld Lakorv, 2012-2020 <staeld@illumine.ch>
+-- Released under the GNU GLPv3+
+
+-- Internal error handling, prettier than error()
+function err(m, f)
+    if not f then f = "" end
+    print("error: " .. m .. f)
+    os.exit(1)
+end
 
 function flags.activate(flag)   -- Call the function of a --flag
     flags[flag]()
@@ -20,17 +28,13 @@ end
 function stats.print(inFile, issummary)
     local s
     if not issummary then
-        s = {
-            { name = "File", data = inFile },
+        s = { { name = "File", data = inFile },
             { name = "Size", data = stats[inFile].size },
-            { name = "Language", data = flang.name }
-        }
+            { name = "Language", data = flang.name } }
         if flang.header then
             table.insert(s, { name = "Header", data = stats[inFile].header })
         end
-        for _, stat in ipairs(s) do
-            balancePrint(stat.name .. " ", stat.data)
-        end
+        for _, stat in ipairs(s) do balancePrint(stat.name .. " ", stat.data) end
         print()
         -- Show author/licence information
         if verbose then
@@ -48,12 +52,10 @@ function stats.print(inFile, issummary)
         end
     end
     if issummary then balancePrint("Total size ", stats[inFile].size) end -- Since it's not covered above
-    local d = {
-        { name = "Code",    code = "l" },
+    local d = { { name = "Code", code = "l" },
         { name = "Comment", code = "c" },
         { name = "Empty",   code = "e" },
-        { name = "Total",   code = "t" }
-    }
+        { name = "Total",   code = "t" } }
     if flang.xomment then
         table.insert(d, 3, { name = "Comment #2", code = "x" })
     end
@@ -72,31 +74,26 @@ function getSize(f)
     local bytes, size, unit
     if not ( type(f) == "userdata" ) then
         bytes = f -- Assume f is actually a byte size
-    else
-        bytes = f:seek("end")
-    end
+    else bytes = f:seek("end") end
     if bytes >= 1048576 then
-        size = bytes / 1048576
-        unit = "MiB"
+        size, unit = bytes / 1048576, "MiB"
     elseif bytes >= 1024 then
-        size = bytes / 1024
-        unit = "kiB"
+        size, unit = bytes / 1024, "kiB"
     else
-        size = bytes
-        unit = "B"
+        size, unit = bytes, "B"
     end
     size = string.format("%.1f " .. unit, size)
     return size, bytes
 end
 function getAuthor(line)
     local copyright = line:lower():find("copyright") or line:find("%s%([Cc]%)%s") or line:find("%S+@%S+%.%S+") or line:find("auth[o:]")
-    if copyright then
+    if copyright and copyright ~= "" then
         copyright = {}
-        copyright.year = line:match("(%d%d%d%d%-?%d?%d?%d?%d?)") or line:match("%([Cc]%)%s+(%d%d%d%d)")
+        copyright.year = line:match("(%d%d%d%d[%-–]?%d?%d?%d?%d?)") or line:match("%([Cc]%)%s+(%d%d%d%d)")
         copyright.author = line:match("[Rr][Ii][Gg][Hh][Tt][Ss]?%s+([^,%d]+)[%s,]+%d?") or line:match("[Rr][Ee][Tt]+%s+([^,]+)[%s,]+%d?") or line:match("%([Cc]%)%s+%d+[,%s]+([^%,]+)%.?$")
         copyright.email  = line:match("([^%s<%(]+@%S+%.[^%s>%)]+)")
+        return copyright
     end
-    return copyright
 end
 function getLicence(line)
     for i, l in ipairs(licences) do
@@ -126,10 +123,9 @@ end
 function getLicenceVersion(line)
     local matches = { "version ", "v" }
     for _, word in ipairs(matches) do
-        local version = line:match(word .. "([%d%.]+)")
+        local version = line:match(word .. "%s*([%d%.]+)")
         if version then return version end
     end
-    if not version then return nil end
 end
 function initTotalStats()
     stats._total = {}

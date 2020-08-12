@@ -1,51 +1,22 @@
 #!/usr/bin/env lua5.3
--- codestats.lua 1.6.0 - analyze source code
--- Copyright Stæld Lakorv, 2010-2013; 2019 <staeld@illumine.ch>
--- Released under GPLv3+
+-- codestats.lua 1.6.1 - analyze source code
+-- Copyright Stæld Lakorv, 2010-2020 <staeld@illumine.ch>
+-- Released under the GNU GPLv3+
 
--- {{{ Functions, vars
-langs   = {}
-stats   = {}
-file    = { "config", "funcs", "langs" }
-inFiles = {} -- Container that keeps the files we'll analyse
+-- Init
+reqs         = { "config", "funcs", "langs" }
+inFiles      = {} -- Container that keeps the files we'll analyse
+langs, stats = {}, {}
 
--- Internal error handling, prettier than error()
-function err(m, f)
-    if not f then f = "" end
-    print("error: " .. m .. f)
-    os.exit(1)
-end
--- }}}
+for _, f in ipairs(reqs) do require(f) end  -- Get the required files
 
--- {{{ Init
-for _, f in ipairs(file) do require(f) end  -- Get the required files
--- Generate list of valid languages for use in help message
-for _, lang in ipairs(langs) do
-    if not langs.list then
-        langs.list = lang.name
-    else
-        langs.list = langs.list .. " " .. lang.name
-    end
-end
-
--- Read version and usage from self
-io.input(arg[0])
-name = ""
-while not name:match("^%-%-%s-(codestats%.lua.*)$") or not io.read() do
-    name = io.read()
-end
-io.close()
-name = name:gsub("^%W*", "")
--- }}}
-
--- {{{ Sanity check
-if not arg[1] then
-    err(msg.noarg)
+-- Sanity check
+if not arg[1] then err(msg.noarg)
 elseif arg[1] == "--help" then
     msg.help()
     os.exit()
 end
--- }}}
+
 -- {{{ Read command line input flags and files
 for i, flag in ipairs(arg) do
     if flag:match("^[^-]") then
@@ -65,7 +36,6 @@ for i, flag in ipairs(arg) do
         if not flang then
             for _, lang in pairs(langs) do -- Check for header
                 if lang.header and h:match("^" .. lang.header) then
-                    -- print(msg.lFound .. "header") -- Debuggers are for people who know what they're doing
                     flang = lang
                     break
                 end
@@ -75,7 +45,6 @@ for i, flag in ipairs(arg) do
             ending = inFile:match("[%w%p%s]+%.(%w+)$")
             for _, lang in ipairs(langs) do -- Check for file ending in filename
                 if ending:match(lang.ending) then
-                    -- print(msg.lFound .. "ending") -- What is debugging even
                     flang = lang
                     break
                 end
@@ -110,9 +79,8 @@ end
 
 local first = true
 for inFile, t in pairs(inFiles) do
-    if first then first = false
-    elseif not dosumonly then print("\n----\n") end
-    stats[inFile] = {
+    if first then first = false elseif not dosumonly then print("\n----\n") end
+    stats[inFile] = {  -- Initiate blank stats for current file
         header = "no", -- Changed if found later
         lcount = 0, -- Lines of code
         ccount = 0, -- Comments
@@ -173,7 +141,7 @@ for inFile, t in pairs(inFiles) do
         end
     end
     -- }}}
-    -- {{{ Present data
+    -- Present data
     stats[inFile].tcount = stats[inFile].ccount + stats[inFile].lcount + stats[inFile].ecount + stats[inFile].xcount  -- Total count
     local bytes
     stats[inFile].size, bytes = getSize(f)
@@ -187,11 +155,9 @@ for inFile, t in pairs(inFiles) do
         end
         stats._total.bytes = stats._total.bytes + bytes
     end
-    -- }}}
 end
--- Do the summary if required
 if dosummary or dosumonly then
---    if not first then print("\n----\n") end -- Uncomment to make summaries pretty; comment to make sumonly pretty
+    if not dosumonly then print("\n----\n") end
     print("Total summary\n")
     stats._total = stats.percent(stats._total)
     stats._total.size = getSize(stats._total.bytes)
